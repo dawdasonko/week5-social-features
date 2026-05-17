@@ -79,6 +79,8 @@ a {
   font-weight: 700;
 }
 
+/* Inputs */
+
 input,
 textarea {
   width: 100%;
@@ -142,6 +144,11 @@ button.secondary {
 button.secondary:hover {
   background: #e0e7ff;
   box-shadow: none;
+}
+
+.create-post-card button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Navbar */
@@ -226,6 +233,52 @@ button.secondary:hover {
   font-size: 17px;
 }
 
+/* Media upload */
+
+.file-label {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 12px 18px;
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px dashed #818cf8;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.file-label:hover {
+  background: #e0e7ff;
+}
+
+.file-input {
+  display: none;
+}
+
+.media-preview {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 18px;
+  margin: 14px auto;
+  border: 1px solid #e2e8f0;
+  background: #0f172a;
+}
+
+.post-media {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 20px;
+  margin: 15px auto 0;
+  border: 1px solid #e2e8f0;
+  background: #0f172a;
+}
+
+/* Actions */
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -286,6 +339,8 @@ button.secondary:hover {
   font-weight: 700;
 }
 
+/* Messages */
+
 .error {
   color: var(--danger);
   background: rgba(239, 68, 68, 0.1);
@@ -332,5 +387,13 @@ button.secondary:hover {
 
   button {
     width: auto;
+  }
+
+  .post-media {
+    height: 220px;
+  }
+
+  .media-preview {
+    height: 200px;
   }
 }

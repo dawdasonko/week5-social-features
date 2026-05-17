@@ -38,15 +38,24 @@ function PostCard({ post, refreshPosts }) {
   };
 
   return (
-    <div className="card">
+    <div className="card post-card">
       <div className="post-meta">
         Posted by {post.user_name} | {new Date(post.created_at).toLocaleString()}
       </div>
 
-      <p>{post.content}</p>
+      {post.content && <p>{post.content}</p>}
+
+      {post.media_url && post.media_type?.startsWith("image/") && (
+        <img className="post-media" src={post.media_url} alt="Post media" />
+      )}
+
+      {post.media_url && post.media_type?.startsWith("video/") && (
+        <video className="post-media" src={post.media_url} controls />
+      )}
 
       <div className="actions">
         <button onClick={likePost}>Like</button>
+
         <button className="secondary" onClick={unlikePost}>
           Unlike
         </button>

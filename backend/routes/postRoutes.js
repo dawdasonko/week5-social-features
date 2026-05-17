@@ -1,28 +1,59 @@
 const express = require("express");
+const multer = require("multer");
 const db = require("../db");
 const authMiddleware = require("../middleware/authMiddleware");
+const { storage } = require("../utils/cloudinaryStorage");
 
 const router = express.Router();
 
-// Create post
-router.post("/", authMiddleware, (req, res) => {
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 25 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "video/mp4",
+      "video/quicktime",
+      "video/webm"
+    ];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only JPG, PNG, GIF, MP4, MOV, and WEBM files are allowed"));
+    }
+
+    cb(null, true);
+  }
+});
+
+// Create post with optional media upload
+router.post("/", authMiddleware, upload.single("media"), (req, res) => {
   const { content } = req.body;
   const userId = req.user.id;
 
-  if (!content) {
-    return res.status(400).json({ message: "Post content is required" });
+  const mediaUrl = req.file ? req.file.path : null;
+  const mediaType = req.file ? req.file.mimetype : null;
+
+  if (!content && !mediaUrl) {
+    return res.status(400).json({ message: "Post content or media is required" });
   }
 
-  const sql = "INSERT INTO posts (user_id, content) VALUES (?, ?)";
+  const sql = "INSERT INTO posts (user_id, content, media_url, media_type) VALUES (?, ?, ?, ?)";
 
-  db.query(sql, [userId, content], (err, result) => {
+  db.query(sql, [userId, content || "", mediaUrl, mediaType], (err, result) => {
     if (err) {
       return res.status(500).json({ message: "Failed to create post", error: err });
     }
 
     res.status(201).json({
       message: "Post created successfully",
-      postId: result.insertId
+      postId: result.insertId,
+      mediaUrl,
+      mediaType
     });
   });
 });
@@ -33,6 +64,8 @@ router.get("/", authMiddleware, (req, res) => {
     SELECT 
       posts.id,
       posts.content,
+      posts.media_url,
+      posts.media_type,
       posts.created_at,
       users.id AS user_id,
       users.name AS user_name,
@@ -63,6 +96,8 @@ router.get("/my-posts", authMiddleware, (req, res) => {
     SELECT 
       posts.id,
       posts.content,
+      posts.media_url,
+      posts.media_type,
       posts.created_at,
       users.name AS user_name
     FROM posts
@@ -88,6 +123,8 @@ router.get("/feed/following", authMiddleware, (req, res) => {
     SELECT 
       posts.id,
       posts.content,
+      posts.media_url,
+      posts.media_type,
       posts.created_at,
       users.id AS user_id,
       users.name AS user_name,
@@ -130,6 +167,15 @@ router.delete("/:postId", authMiddleware, (req, res) => {
 
     res.json({ message: "Post deleted successfully" });
   });
+});
+
+// Multer error handler for file validation
+router.use((err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ message: err.message });
+  }
+
+  next();
 });
 
 module.exports = router;
